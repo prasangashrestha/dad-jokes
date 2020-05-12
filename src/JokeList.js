@@ -26,7 +26,12 @@ export default class JokeList extends Component {
             jokes.push({id: Math.random(), joke: res.data.joke, votes: 0});
         }
 
-        this.setState({jokes: jokes})
+        this.setState(st => ({
+            jokes: [...st.jokes, ...jokes ]
+        
+        }),
+            () => window.localStorage.setItem('jokes', JSON.stringify(this.state.jokes))
+        )
         window.localStorage.setItem('jokes', JSON.stringify(jokes))
   
     }
@@ -36,7 +41,9 @@ export default class JokeList extends Component {
             jokes: st.jokes.map(j => 
                 j.id === id ? {...j, votes: j.votes + delta}: j)
                 
-        }))
+        }),
+            () => window.localStorage.setItem('jokes', JSON.stringify(this.state.jokes))
+        )
     }
 
     render() {
@@ -58,7 +65,7 @@ export default class JokeList extends Component {
                         <span>Dad</span> Jokes
                         <img src="https://assets.dryicons.com/uploads/icon/svg/8927/0eb14c71-38f2-433a-bfc8-23d9c99b3647.svg" alt='ss'/>
                     </h1>
-                    <button className="JokeList-getmore">Get Jokes</button>
+                    <button onClick={() => this.getJokes()} className="JokeList-getmore">Get Jokes</button>
                 </div>
                 <div className="JokeList-jokes">
                      {jokes}
