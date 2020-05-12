@@ -1,0 +1,9 @@
+.Joke{
+    display: flex;
+    border-bottom: 2px solid #eeeeee;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    padding: 1rem;
+    
+}

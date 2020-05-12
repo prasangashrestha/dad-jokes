@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import axios from 'axios';
 import './JokeList.css'
+import Joke from './Joke';
+
 
 export default class JokeList extends Component {
     static defaultProps = {
@@ -16,15 +18,30 @@ export default class JokeList extends Component {
         while(jokes.length < this.props.numJokesToGet){
             let res = await axios.get('https://icanhazdadjoke.com/',
                    {headers: {Accept: 'application/json'}});
-            jokes.push(res.data.joke);
+            jokes.push({id: Math.random(), joke: res.data.joke, votes: 0});
         }
 
         this.setState({jokes: jokes})
   
     }
+
+    handleVote = (id, delta) => {
+        this.setState(st => ({
+            jokes: st.jokes.map(j => 
+                j.id === id ? {...j, votes: j.votes + delta}: j)
+                
+        }))
+    }
+
     render() {
         const jokes = this.state.jokes.map(joke => (
-            <p>{joke}</p>
+            <Joke 
+                key={joke.id} 
+                joke={joke.joke}
+                votes={joke.votes}
+                upvote={() => this.handleVote(joke.id, 1)}
+                downvote={() => this.handleVote(joke.id, -1)}
+                />
         ))
 
         return (
