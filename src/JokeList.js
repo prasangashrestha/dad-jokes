@@ -14,9 +14,16 @@ export default class JokeList extends Component {
         numJokesToGet: 10
     }
 
-    state = {
-        jokes: JSON.parse(window.localStorage.getItem('jokes') || '[]')
+    constructor(props) {
+        super(props);
+        this.state = {
+            jokes: JSON.parse(window.localStorage.getItem('jokes') || '[]'),
+            loading:false
+        }
+        this.seenJokes = new Set(this.state.jokes.map(j => j.text))
     }
+
+    
 
      componentDidMount() {
         if(this.state.jokes.length === 0 ) this.getJokes()
@@ -28,7 +35,15 @@ export default class JokeList extends Component {
         while(jokes.length < this.props.numJokesToGet){
             let res = await axios.get('https://icanhazdadjoke.com/',
                    {headers: {Accept: 'application/json'}});
-            jokes.push({id: Math.random(), joke: res.data.joke, votes: 0});
+            
+            let newJoke = res.data.joke;
+            if(!this.seenJokes.has(newJoke)){
+                jokes.push({id: Math.random(), joke: res.data.joke, votes: 0});
+            }else{
+                console.log('Found a duplicate')
+                console.log(newJoke)
+            }
+            
         }
 
         this.setState(st => ({
@@ -65,14 +80,16 @@ export default class JokeList extends Component {
                 </div>
             )
         }
-        const jokes = this.state.jokes.map(joke => (
-            <Joke 
-                key={joke.id} 
-                joke={joke.joke}
-                votes={joke.votes}
-                upvote={() => this.handleVote(joke.id, 1)}
-                downvote={() => this.handleVote(joke.id, -1)}
-                />
+        const jokes = this.state.jokes
+                        .sort((a,b) => b.votes - a.votes)
+                        .map(joke => (
+                            <Joke 
+                                key={joke.id} 
+                                joke={joke.joke}
+                                votes={joke.votes}
+                                upvote={() => this.handleVote(joke.id, 1)}
+                                downvote={() => this.handleVote(joke.id, -1)}
+                                />
         ))
 
         return (
@@ -84,7 +101,7 @@ export default class JokeList extends Component {
                         <span>Dad</span> Jokes
                         <img src="https://assets.dryicons.com/uploads/icon/svg/8927/0eb14c71-38f2-433a-bfc8-23d9c99b3647.svg" alt='ss'/>
                     </h1>
-                    <button onClick={this.handleClick} className="JokeList-getmore">Get Jokes</button>
+                    <button onClick={this.handleClick} className="JokeList-getMore">New Jokes</button>
                 </div>
                 <div className="JokeList-jokes">
                      {jokes}
